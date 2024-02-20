@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  user_service_db:
+    image: mysql:8.0.28
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${USER_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "13309:3306"
+    volumes:
+      - user_service_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  product_service_db:
+    image: mysql:8.0.28
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${PRODUCT_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "13310:3306"
+    volumes:
+      - product_service_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  orders_service_db:
+    image: mysql:8.0.28
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${ORDERS_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "13311:3306"
+    volumes:
+      - orders_service_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  payment_service_db:
+    image: mysql:8.0.28
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${PAYMENT_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "13312:3306"
+    volumes:
+      - payment_service_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+volumes:
+  user_service_data:
+  product_service_data:
+  orders_service_data:
+  payment_service_data:
