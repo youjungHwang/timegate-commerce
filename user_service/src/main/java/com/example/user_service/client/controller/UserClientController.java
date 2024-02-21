@@ -1,4 +1,4 @@
-package com.example.user_service.user.controller;
+package com.example.user_service.client.controller;
 
 import com.example.user_service.user.service.UserService;
 import lombok.RequiredArgsConstructor;
