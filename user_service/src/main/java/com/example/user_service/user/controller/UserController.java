@@ -25,7 +25,7 @@ public class UserController {
         SignUpResponseDto signUpResponseDto = userService.signUp(signUpRequestDto);
         ApiResponse<SignUpResponseDto> response = new ApiResponse<>(
                 HttpStatus.OK,
-                "Success",
+                "이메일로 회원가입 성공",
                 signUpResponseDto
         );
         return ResponseEntity.ok(response);
