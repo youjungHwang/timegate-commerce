@@ -1,9 +1,12 @@
 package com.example.user_service.user.controller;
 
+
+import com.example.user_service.common.dto.response.ApiResponse;
 import com.example.user_service.user.dto.request.SignUpRequestDto;
 import com.example.user_service.user.dto.response.SignUpResponseDto;
 import com.example.user_service.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +21,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/api/v1/users/signup")
-    public ResponseEntity<SignUpResponseDto> signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
-        return ResponseEntity.ok(userService.signUp(signUpRequestDto));
+    public ResponseEntity<ApiResponse<SignUpResponseDto>> signUp(@RequestBody SignUpRequestDto signUpRequestDto) {
+        SignUpResponseDto signUpResponseDto = userService.signUp(signUpRequestDto);
+        ApiResponse<SignUpResponseDto> response = new ApiResponse<>(
+                HttpStatus.OK,
+                "Success",
+                signUpResponseDto
+        );
+        return ResponseEntity.ok(response);
     }
 
 }
