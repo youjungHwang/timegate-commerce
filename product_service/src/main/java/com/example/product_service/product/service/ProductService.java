@@ -116,9 +116,11 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (!product.getProductType().equals(ProductType.REGULAR)) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        if (product.getDeletedAt() != null) {
+            throw new CustomException(ErrorCode.DELETED_ITEM);
         }
-        productRepository.delete(product);
+        stockClient.deleteProductStocks(productId);
+        product.softDelete();
+        productRepository.save(product);
     }
 }

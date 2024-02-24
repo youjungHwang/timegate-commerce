@@ -17,7 +17,7 @@ public class StockService {
 
     private final StockRepository stockRepository;
     @Transactional(readOnly = true)
-    public Long getProductStock(Long productId) {
+    public Long getProductStock(final Long productId) {
         // feign
         Stock stocks = stockRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
@@ -25,17 +25,14 @@ public class StockService {
         return stocks.getStock();
     }
     @Transactional(readOnly = true)
-    public Long getReservedProductStock(Long productId) {
+    public Long getReservedProductStock(final Long productId) {
         Stock stocks = stockRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
 
         return stocks.getStock();
     }
-    /**
-     * ms 간 통신
-     */
     @Transactional
-    public void decreaseStock(Long productId, Long quantity) {
+    public void decreaseStock(final Long productId, final Long quantity) {
         // 상품 ID를 기반으로 재고 엔티티를 찾습니다.
         Stock stock = stockRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -61,7 +58,7 @@ public class StockService {
      * 재고 생성
      */
     @Transactional
-    public StockCreateResponseDto createProductStock(Long productId, Long quantity) {
+    public StockCreateResponseDto createProductStock(final Long productId, final Long quantity) {
         // 상품 ID로 이미 재고가 있는지 확인
         boolean exists = stockRepository.existsByProductId(productId);
         if (exists) {
@@ -79,13 +76,19 @@ public class StockService {
      * 상품의 재고 조회 요청
      */
     @Transactional(readOnly = true)
-    public StockResponseDto getProductStocks(Long productId) {
+    public StockResponseDto getProductStocks(final Long productId) {
         Stock stock = stockRepository.findById(productId)
                 .filter(s -> s.getStock() > 0)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
         return new StockResponseDto(stock.getProductId(), stock.getStock());
     }
-
-
-
+    /**
+     * 상품 삭제 요청
+     */
+    @Transactional
+    public void deleteProductStocks(final Long productId) {
+        Stock stock = stockRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
+        stockRepository.delete(stock);
+    }
 }

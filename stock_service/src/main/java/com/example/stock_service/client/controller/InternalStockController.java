@@ -49,4 +49,14 @@ public class InternalStockController {
         StockResponseDto responseDto = stockService.getProductStocks(productId);
         return ResponseEntity.ok().body(responseDto);
     }
+
+    /**
+     * 상품 삭제 요청
+     */
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProductStocks(
+            @PathVariable("productId") final Long productId) {
+        stockService.deleteProductStocks(productId);
+        return ResponseEntity.ok().build();
+    }
 }
