@@ -1,6 +1,7 @@
 package com.example.stock_service.stock.service;
 
 
+import com.example.stock_service.client.dto.request.StockRequestDto;
 import com.example.stock_service.client.dto.response.StockCreateResponseDto;
 import com.example.stock_service.client.dto.response.StockResponseDto;
 import com.example.stock_service.common.handler.exception.CustomException;
@@ -49,11 +50,6 @@ public class StockService {
         stockRepository.save(stock);
     }
 
-    @Transactional(readOnly = true)
-    public boolean checkProductStockExists(Long productId) {
-       return stockRepository.existsByProductId(productId);
-    }
-
     /**
      * 재고 생성
      */
@@ -90,5 +86,40 @@ public class StockService {
         Stock stock = stockRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
         stockRepository.delete(stock);
+    }
+
+    /**
+     * 재고 증가 요청
+     */
+    @Transactional
+    public StockResponseDto increaseProductStock(StockRequestDto requestDto) {
+        Stock stock = stockRepository.findById(requestDto.productId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Long newStockQuantity = stock.getStock() + requestDto.stock();
+
+        Stock updatedStock = stockRepository.save(Stock.builder()
+                .productId(stock.getProductId())
+                .stock(newStockQuantity)
+                .build());
+
+        return new StockResponseDto(updatedStock.getProductId(), updatedStock.getStock());
+    }
+    /**
+     * 재고 감소 요청
+     */
+    @Transactional
+    public StockResponseDto decreaseProductStock(StockRequestDto requestDto) {
+        Stock stock = stockRepository.findById(requestDto.productId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        Long newStockQuantity = stock.getStock() - requestDto.stock();
+
+        Stock updatedStock = stockRepository.save(Stock.builder()
+                .productId(stock.getProductId())
+                .stock(newStockQuantity)
+                .build());
+
+        return new StockResponseDto(updatedStock.getProductId(), updatedStock.getStock());
     }
 }

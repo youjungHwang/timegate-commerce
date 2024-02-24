@@ -41,24 +41,10 @@ public class Orders {
 
     private LocalDateTime deletedAt;
 
-    public void createOrders(OrdersCreateRequestDto requestDto) {
-        this.userId = requestDto.userId();
-        this.productId = requestDto.productId();
-        this.price = requestDto.price();
-        this.quantity = requestDto.quantity();
+    public void cancelOrder(OrdersType type) {
+        this.ordersType = type;
     }
-    public OrdersCreateResponseDto toCreateResponseDto() {
-        return new OrdersCreateResponseDto(
-                this.getId(),
-                this.getUserId(),
-                this.getProductId(),
-                this.getPrice(),
-                this.getQuantity(),
-                this.getOrdersType()
-        );
+    public void updateOrderStatus(OrdersType type) {
+        this.ordersType = type;
     }
-
-
-
-
 }
