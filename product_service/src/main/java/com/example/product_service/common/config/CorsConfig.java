@@ -21,6 +21,7 @@ public class CorsConfig {
         source.registerCorsConfiguration("/orders-service/api/**", config);
         source.registerCorsConfiguration("/product-service/api/**", config);
         source.registerCorsConfiguration("/payment-service/api/**", config);
+        source.registerCorsConfiguration("/stock-service/api/**", config);
         return new CorsFilter(source);
     }
 }

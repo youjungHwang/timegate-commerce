@@ -1,0 +1,78 @@
+package com.example.stock_service.stock.service;
+
+
+import com.example.stock_service.client.dto.response.StockCreateResponseDto;
+import com.example.stock_service.common.handler.exception.CustomException;
+import com.example.stock_service.common.handler.exception.ErrorCode;
+import com.example.stock_service.stock.entity.Stock;
+import com.example.stock_service.stock.repository.StockRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@RequiredArgsConstructor
+@Service
+public class StockService {
+
+    private final StockRepository stockRepository;
+    @Transactional(readOnly = true)
+    public Long getProductStock(Long productId) {
+        // feign
+        Stock stocks = stockRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
+
+        return stocks.getStock();
+    }
+    @Transactional(readOnly = true)
+    public Long getReservedProductStock(Long productId) {
+        Stock stocks = stockRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
+
+        return stocks.getStock();
+    }
+    /**
+     * ms 간 통신
+     */
+    @Transactional
+    public void decreaseStock(Long productId, Long quantity) {
+        // 상품 ID를 기반으로 재고 엔티티를 찾습니다.
+        Stock stock = stockRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 현재 재고 수량을 확인하고, 요청된 수량만큼 감소시킵니다.
+        Long currentStock = stock.getStock();
+        if (currentStock < quantity) {
+            // 요청된 수량이 현재 재고보다 많은 경우, 예외를 발생시킵니다.
+            throw new CustomException(ErrorCode.STOCK_NOT_ENOUGH);
+        }
+
+        // 재고 수량을 감소시키고 업데이트합니다.
+        stock.updateStocks(currentStock - quantity);
+        stockRepository.save(stock);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkProductStockExists(Long productId) {
+       return stockRepository.existsByProductId(productId);
+    }
+
+    /**
+     * 재고 생성
+     */
+    @Transactional
+    public StockCreateResponseDto createProductStock(Long productId, Long quantity) {
+        // 상품 ID로 이미 재고가 있는지 확인
+        boolean exists = stockRepository.existsByProductId(productId);
+        if (exists) {
+            // 이미 재고가 있는 경우, 예외처리
+            throw new CustomException(ErrorCode.STOCK_ALREADY_EXISTS);
+        }
+        // 재고 객체를 생성
+        Stock stock = new Stock(productId, quantity);
+
+        Stock savedStock = stockRepository.save(stock);
+
+        return new StockCreateResponseDto(savedStock.getProductId(), savedStock.getStock());
+    }
+
+}
