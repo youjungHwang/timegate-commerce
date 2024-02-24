@@ -31,6 +31,8 @@ public class ProductController {
      * 일반 상품 생성
      * 일반 상품 전체 조회
      * 일반 상품 상세 조회
+     * 일반 상품 정보 수정
+     * 일반 상품 삭제
      */
     @PostMapping("/products")
     public ResponseEntity<ApiResponse<ProductCreateResponseDto>> createProduct(
@@ -91,18 +93,20 @@ public class ProductController {
     }
 
     @DeleteMapping("/products/{productId}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable final Long productId) {
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable final Long productId) {
         productService.deleteProduct(productId);
         ApiResponse<Void> response = new ApiResponse<>(
                 HttpStatus.OK,
                 "일반 상품 삭제 성공",
                 null
         );
+
         return ResponseEntity.ok(response);
     }
 
     /**
-     * 예약 상품 -  등록 추가해야함
+     * 예약 상품 -  등록 추가 필요
      */
     @GetMapping("/reserved-products")
     public ResponseEntity<ApiResponse<Page<Product>>> getAllReservedProducts(Pageable pageable) {

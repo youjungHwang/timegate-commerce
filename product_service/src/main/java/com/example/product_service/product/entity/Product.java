@@ -53,4 +53,8 @@ public class Product extends BaseTimeEntity {
         this.productType = requestDto.productType();
     }
 
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
 }
