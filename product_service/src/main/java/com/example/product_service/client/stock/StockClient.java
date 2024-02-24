@@ -2,6 +2,7 @@ package com.example.product_service.client.stock;
 
 import com.example.product_service.client.stock.dto.request.StockCreateRequestDto;
 import com.example.product_service.client.stock.dto.response.StockCreateResponseDto;
+import com.example.product_service.client.stock.dto.response.StockResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,9 +14,14 @@ public interface StockClient {
     @RequestMapping(method = RequestMethod.GET, value = "/api/v1/stocks/{productId}/exists", consumes = "application/json")
     boolean checkProductStockExists(@PathVariable("productId") Long productId);
 
-    // [createProduct 사용] 재고 생성 요청 보냄
+    // [createProduct 사용] 재고 생성 요청
     @RequestMapping(method = RequestMethod.POST, value = "/api/v1/stocks", consumes = "application/json")
     StockCreateResponseDto createProductStock(@RequestBody StockCreateRequestDto requestDto);
+
+    // [getProductDetails 사용] 상품의 재고 조회 요청
+    @RequestMapping(method = RequestMethod.GET, value = "/api/v1/stocks/{productId}", consumes = "application/json")
+    StockResponseDto getProductStocks(@PathVariable("productId") Long productId);
 }
+
 
 

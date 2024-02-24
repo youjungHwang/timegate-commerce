@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -37,6 +38,8 @@ public class Orders {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrdersType ordersType;
+
+    private LocalDateTime deletedAt;
 
     public void createOrders(OrdersCreateRequestDto requestDto) {
         this.userId = requestDto.userId();

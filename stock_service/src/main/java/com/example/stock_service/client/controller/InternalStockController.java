@@ -2,6 +2,7 @@ package com.example.stock_service.client.controller;
 
 import com.example.stock_service.client.dto.request.StockCreateRequestDto;
 import com.example.stock_service.client.dto.response.StockCreateResponseDto;
+import com.example.stock_service.client.dto.response.StockResponseDto;
 import com.example.stock_service.stock.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +38,15 @@ public class InternalStockController {
             @RequestBody final StockCreateRequestDto requestDto) {
         StockCreateResponseDto response = stockService.createProductStock(requestDto.productId(), requestDto.stock());
         return ResponseEntity.ok().body(response);
+    }
+
+    /**
+     * 상품의 재고 조회 요청
+     */
+    @GetMapping("/{productId}")
+    public ResponseEntity<StockResponseDto> getProductStocks(
+            @PathVariable("productId") final Long productId) {
+        StockResponseDto responseDto = stockService.getProductStocks(productId);
+        return ResponseEntity.ok().body(responseDto);
     }
 }

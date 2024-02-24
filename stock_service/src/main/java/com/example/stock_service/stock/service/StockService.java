@@ -2,6 +2,7 @@ package com.example.stock_service.stock.service;
 
 
 import com.example.stock_service.client.dto.response.StockCreateResponseDto;
+import com.example.stock_service.client.dto.response.StockResponseDto;
 import com.example.stock_service.common.handler.exception.CustomException;
 import com.example.stock_service.common.handler.exception.ErrorCode;
 import com.example.stock_service.stock.entity.Stock;
@@ -74,5 +75,17 @@ public class StockService {
 
         return new StockCreateResponseDto(savedStock.getProductId(), savedStock.getStock());
     }
+    /**
+     * 상품의 재고 조회 요청
+     */
+    @Transactional(readOnly = true)
+    public StockResponseDto getProductStocks(Long productId) {
+        Stock stock = stockRepository.findById(productId)
+                .filter(s -> s.getStock() > 0)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
+        return new StockResponseDto(stock.getProductId(), stock.getStock());
+    }
+
+
 
 }

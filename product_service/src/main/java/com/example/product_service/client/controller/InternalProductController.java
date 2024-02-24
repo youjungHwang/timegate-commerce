@@ -1,6 +1,6 @@
 package com.example.product_service.client.controller;
 
-import com.example.product_service.client.dto.response.ProductDetailsResponseDto;
+import com.example.product_service.product.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class InternalProductController {
     private final ProductService productService;
 
+    /**
+     * [order_service] createOrder 주문 생성에서 사용
+     */
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailsResponseDto> getProductDetails(
             @PathVariable("productId") final Long productId) {

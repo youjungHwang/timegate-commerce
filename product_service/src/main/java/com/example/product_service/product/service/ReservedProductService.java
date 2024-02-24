@@ -19,7 +19,7 @@ public class ReservedProductService {
     private final ProductRepository productRepository;
     @Transactional(readOnly = true)
     public Page<Product> getAllReservedProducts(Pageable pageable) {
-        Page<Product> products = productRepository.findAllByProductType(ProductType.RESERVED, pageable);
+        Page<Product> products = productRepository.findAllByProductTypeAndDeletedAtIsNull(ProductType.RESERVED, pageable);
         if (products.isEmpty()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
         }

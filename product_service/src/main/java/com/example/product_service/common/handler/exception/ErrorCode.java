@@ -10,6 +10,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "상품에 대한 재고정보를 찾을 수 없습니다."),
     STOCK_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "요청된 수량이 재고보다 많습니다."),
+    DELETED_ITEM(HttpStatus.BAD_REQUEST, "이미 삭제된 항목입니다."),
 
     // 5xx
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 있습니다.");
