@@ -1,25 +1,59 @@
 package com.example.product_service.product.service;
 
+import com.example.product_service.client.dto.response.ProductDetailsResponseDto;
+import com.example.product_service.client.stock.StockClient;
+import com.example.product_service.client.stock.dto.request.StockCreateRequestDto;
+import com.example.product_service.client.stock.dto.response.StockCreateResponseDto;
 import com.example.product_service.common.handler.exception.CustomException;
 import com.example.product_service.common.handler.exception.ErrorCode;
+import com.example.product_service.product.dto.request.ProductCreateRequestDto;
 import com.example.product_service.product.dto.request.ProductUpdateRequestDto;
+import com.example.product_service.product.dto.response.ProductCreateResponseDto;
 import com.example.product_service.product.dto.response.ProductUpdateResponseDto;
 import com.example.product_service.product.entity.Product;
 import com.example.product_service.product.enums.ProductType;
 import com.example.product_service.product.repository.ProductRepository;
-import com.example.product_service.product.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.product_service.stock.entity.Stock;
 
 @RequiredArgsConstructor
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
-    private final StockRepository stockRepository;
+    private final StockClient stockClient;
+
+    @Transactional
+    public ProductCreateResponseDto createProduct(final ProductCreateRequestDto requestDto) {
+        // [재고 서비스] 재고 생성 요청 (feign)
+        StockCreateRequestDto stockCreateRequestDto = new StockCreateRequestDto(
+                requestDto.productId(), requestDto.stock());
+        StockCreateResponseDto stockCreateResponseDto = stockClient.createProductStock(stockCreateRequestDto);
+
+        // 새 상품 생성
+        Product product = Product.builder()
+                .productName(requestDto.productName())
+                .price(requestDto.price())
+                .productType(requestDto.productType())
+                .build();
+
+        // 리포지토리에 저장
+        Product savedProduct = productRepository.save(product);
+
+        // ProductCreateResponseDto 생성
+        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(
+                savedProduct.getId(),
+                savedProduct.getProductName(),
+                savedProduct.getPrice(),
+                stockCreateResponseDto.stock(),
+                savedProduct.getProductType()
+        );
+
+        return responseDto;
+    }
+
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAllByProductType(ProductType.REGULAR, pageable);
@@ -33,7 +67,6 @@ public class ProductService {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
-
     @Transactional
     public ProductUpdateResponseDto updateProduct(
             Long productId,
@@ -52,15 +85,6 @@ public class ProductService {
                 product.getProductType()
         );
     }
-
-    @Transactional(readOnly = true)
-    public Long getProductStock(Long productId) {
-        Stock stocks = stockRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
-        return stocks.getStock();
-    }
-
     @Transactional
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
@@ -71,4 +95,20 @@ public class ProductService {
         }
         productRepository.delete(product);
     }
+    /**
+     * ms 간 통신
+     */
+    @Transactional(readOnly = true) // 일반 상품
+    public ProductDetailsResponseDto getProductDetails(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if(stockClient.checkProductStockExists(productId)){
+            return product.toProductDetailsResponseDto();
+        } else {
+            throw new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND);
+        }
+    }
+
+
 }

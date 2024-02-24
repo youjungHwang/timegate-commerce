@@ -1,8 +1,10 @@
 package com.example.product_service.product.controller;
 
 import com.example.product_service.common.dto.response.ApiResponse;
+import com.example.product_service.product.dto.request.ProductCreateRequestDto;
 import com.example.product_service.product.dto.request.ProductUpdateRequestDto;
 import com.example.product_service.product.dto.request.ReservedProductUpdateRequestDto;
+import com.example.product_service.product.dto.response.ProductCreateResponseDto;
 import com.example.product_service.product.dto.response.ProductUpdateResponseDto;
 import com.example.product_service.product.dto.response.ReservedProductUpdateResponseDto;
 import com.example.product_service.product.entity.Product;
@@ -22,6 +24,17 @@ public class ProductController {
 
     private final ProductService productService;
     private final ReservedProductService reservedProductService;
+    @PostMapping("/products")
+    public ResponseEntity<ApiResponse<ProductCreateResponseDto>> createProduct(
+            @RequestBody final ProductCreateRequestDto productCreateRequestDto) {
+        ProductCreateResponseDto productDto = productService.createProduct(productCreateRequestDto);
+        ApiResponse<ProductCreateResponseDto> response = new ApiResponse<>(
+                HttpStatus.OK,
+                "일반 상품 생성 성공",
+                productDto
+        );
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/products")
     public ResponseEntity<ApiResponse<Page<Product>>> getAllProducts(Pageable pageable) {
@@ -58,17 +71,6 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/products/{productId}/stock")
-    public ResponseEntity<ApiResponse<Long>> getProductStock(@PathVariable final Long productId) {
-        Long currentStockCount = productService.getProductStock(productId);
-        ApiResponse<Long> response = new ApiResponse<>(
-                HttpStatus.OK,
-                "일반 상품 남은 재고 조회 성공",
-                currentStockCount
-        );
-        return ResponseEntity.ok(response);
-    }
-
     @DeleteMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable final Long productId) {
         productService.deleteProduct(productId);
@@ -81,7 +83,7 @@ public class ProductController {
     }
 
     /**
-     * 예약 상품
+     * 예약 상품 -  등록 추가해야함
      */
     @GetMapping("/reserved-products")
     public ResponseEntity<ApiResponse<Page<Product>>> getAllReservedProducts(Pageable pageable) {
@@ -117,18 +119,6 @@ public class ProductController {
         );
         return ResponseEntity.ok(response);
     }
-
-    @GetMapping("/reserved-products/{productId}/stock")
-    public ResponseEntity<ApiResponse<Long>> getReservedProductStock(@PathVariable final Long productId) {
-        Long currentStockCount = reservedProductService.getReservedProductStock(productId);
-        ApiResponse<Long> response = new ApiResponse<>(
-                HttpStatus.OK,
-                "예약 상품 남은 재고 조회 성공",
-                currentStockCount
-        );
-        return ResponseEntity.ok(response);
-    }
-
     @DeleteMapping("/reserved-products/{productId}")
     public ResponseEntity<ApiResponse<Void>> deleteReservedProduct(@PathVariable final Long productId) {
         reservedProductService.deleteReservedProduct(productId);

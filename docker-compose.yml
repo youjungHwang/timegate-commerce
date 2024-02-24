@@ -48,8 +48,21 @@ services:
       - payment_service_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
 
+  stock_service_db:
+    image: mysql:8.0.28
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${STOCK_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "13313:3306"
+    volumes:
+      - stock_service_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
 volumes:
   user_service_data:
   product_service_data:
   orders_service_data:
   payment_service_data:
+  stock_service_data:

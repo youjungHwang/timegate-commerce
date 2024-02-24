@@ -7,8 +7,6 @@ import com.example.product_service.product.dto.response.ReservedProductUpdateRes
 import com.example.product_service.product.entity.Product;
 import com.example.product_service.product.enums.ProductType;
 import com.example.product_service.product.repository.ProductRepository;
-import com.example.product_service.product.repository.StockRepository;
-import com.example.product_service.stock.entity.Stock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReservedProductService {
     private final ProductRepository productRepository;
-    private final StockRepository stockRepository;
     @Transactional(readOnly = true)
     public Page<Product> getAllReservedProducts(Pageable pageable) {
         Page<Product> products = productRepository.findAllByProductType(ProductType.RESERVED, pageable);
@@ -51,14 +48,6 @@ public class ReservedProductService {
                 product.getPrice(),
                 product.getProductType()
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Long getReservedProductStock(Long productId) {
-        Stock stocks = stockRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
-        return stocks.getStock();
     }
 
     @Transactional

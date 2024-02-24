@@ -19,6 +19,8 @@ public class FilterConfig {
                         .uri("http://localhost:8083"))
                 .route(r -> r.path("/api/v1/payments/**")
                         .uri("http://localhost:8084"))
+                .route(r -> r.path("/api/v1/stocks/**")
+                        .uri("http://localhost:8085"))
                 .build();
     }
 }
