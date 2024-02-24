@@ -1,14 +1,15 @@
 package com.example.product_service.product.service;
 
-import com.example.product_service.client.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.client.stock.StockClient;
 import com.example.product_service.client.stock.dto.request.StockCreateRequestDto;
 import com.example.product_service.client.stock.dto.response.StockCreateResponseDto;
+import com.example.product_service.client.stock.dto.response.StockResponseDto;
 import com.example.product_service.common.handler.exception.CustomException;
 import com.example.product_service.common.handler.exception.ErrorCode;
 import com.example.product_service.product.dto.request.ProductCreateRequestDto;
 import com.example.product_service.product.dto.request.ProductUpdateRequestDto;
 import com.example.product_service.product.dto.response.ProductCreateResponseDto;
+import com.example.product_service.product.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.product.dto.response.ProductUpdateResponseDto;
 import com.example.product_service.product.entity.Product;
 import com.example.product_service.product.enums.ProductType;
@@ -42,7 +43,7 @@ public class ProductService {
         // 리포지토리에 저장
         Product savedProduct = productRepository.save(product);
 
-        // ProductCreateResponseDto 생성
+        // ProductCreateResponseDto 생성 및 반환
         ProductCreateResponseDto responseDto = new ProductCreateResponseDto(
                 savedProduct.getId(),
                 savedProduct.getProductName(),
@@ -53,14 +54,39 @@ public class ProductService {
 
         return responseDto;
     }
-
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(Pageable pageable) {
-        Page<Product> products = productRepository.findAllByProductType(ProductType.REGULAR, pageable);
+        Page<Product> products = productRepository.findAllByProductTypeAndDeletedAtIsNull(ProductType.REGULAR, pageable);
         if (products.isEmpty()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
         }
         return products;
+    }
+    @Transactional(readOnly = true)
+    public ProductDetailsResponseDto getProductDetails(Long productId) {
+        // 재고 있는지 확인
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // DeletedAt() != null -> 예외처리
+        if (product.getDeletedAt() != null) {
+            throw new CustomException(ErrorCode.DELETED_ITEM);
+        }
+
+        // [재고 서비스] 재고 조회
+        StockResponseDto stockResponse = stockClient.getProductStocks(productId);
+
+        // ProductDetailsResponseDto 생성 및 반환
+        return new ProductDetailsResponseDto(
+                product.getId(),
+                product.getProductName(),
+                product.getPrice(),
+                stockResponse.stock(),
+                product.getProductType(),
+                product.getAvailableFrom(),
+                product.getAvailableUntil()
+        );
+
     }
     @Transactional(readOnly = true)
     public Product getProductById(Long productId) {
@@ -95,20 +121,4 @@ public class ProductService {
         }
         productRepository.delete(product);
     }
-    /**
-     * ms 간 통신
-     */
-    @Transactional(readOnly = true) // 일반 상품
-    public ProductDetailsResponseDto getProductDetails(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        if(stockClient.checkProductStockExists(productId)){
-            return product.toProductDetailsResponseDto();
-        } else {
-            throw new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND);
-        }
-    }
-
-
 }

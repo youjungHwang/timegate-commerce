@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    Page<Product> findAllByProductType(ProductType productType, Pageable pageable);
-
+    Page<Product> findAllByProductTypeAndDeletedAtIsNull(ProductType productType, Pageable pageable);
 }
+
+

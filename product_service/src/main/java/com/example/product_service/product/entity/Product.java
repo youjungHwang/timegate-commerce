@@ -1,11 +1,9 @@
 package com.example.product_service.product.entity;
 
-import com.example.product_service.client.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.common.entity.BaseTimeEntity;
-import com.example.product_service.product.dto.request.ProductCreateRequestDto;
 import com.example.product_service.product.dto.request.ProductUpdateRequestDto;
-import com.example.product_service.product.dto.request.ReservedProductCreateRequestDto;
 import com.example.product_service.product.dto.request.ReservedProductUpdateRequestDto;
+import com.example.product_service.product.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.product.enums.ProductType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -41,6 +39,8 @@ public class Product extends BaseTimeEntity {
 
     private LocalDateTime availableUntil;
 
+    private LocalDateTime deletedAt;
+
     public void updateProduct(ProductUpdateRequestDto requestDto){
         this.productName = requestDto.productName();
         this.price = requestDto.price();
@@ -52,17 +52,5 @@ public class Product extends BaseTimeEntity {
         this.price = requestDto.price();
         this.productType = requestDto.productType();
     }
-
-    public ProductDetailsResponseDto toProductDetailsResponseDto() {
-        return new ProductDetailsResponseDto(
-                this.getId(),
-                this.getProductName(),
-                this.getPrice(),
-                this.getProductType(),
-                this.getAvailableFrom(),
-                this.getAvailableUntil());
-    }
-
-
 
 }

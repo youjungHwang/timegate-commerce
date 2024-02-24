@@ -5,6 +5,7 @@ import com.example.product_service.product.dto.request.ProductCreateRequestDto;
 import com.example.product_service.product.dto.request.ProductUpdateRequestDto;
 import com.example.product_service.product.dto.request.ReservedProductUpdateRequestDto;
 import com.example.product_service.product.dto.response.ProductCreateResponseDto;
+import com.example.product_service.product.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.product.dto.response.ProductUpdateResponseDto;
 import com.example.product_service.product.dto.response.ReservedProductUpdateResponseDto;
 import com.example.product_service.product.entity.Product;
@@ -24,6 +25,13 @@ public class ProductController {
 
     private final ProductService productService;
     private final ReservedProductService reservedProductService;
+
+    /**
+     * [확인]
+     * 일반 상품 생성
+     * 일반 상품 전체 조회
+     * 일반 상품 상세 조회
+     */
     @PostMapping("/products")
     public ResponseEntity<ApiResponse<ProductCreateResponseDto>> createProduct(
             @RequestBody final ProductCreateRequestDto productCreateRequestDto) {
@@ -43,6 +51,17 @@ public class ProductController {
                 HttpStatus.OK,
                 "일반 상품 전체 조회 성공",
                 productPage
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ApiResponse<ProductDetailsResponseDto>> getProductDetails(@PathVariable Long productId){
+        ProductDetailsResponseDto responseDto = productService.getProductDetails(productId);
+        ApiResponse<ProductDetailsResponseDto> response = new ApiResponse<>(
+                HttpStatus.OK,
+                "일반 상품 상세 조회 성공",
+                responseDto
         );
         return ResponseEntity.ok(response);
     }
