@@ -8,6 +8,7 @@ import com.example.orders_service.client.stock.dto.response.StockResponseDto;
 import com.example.orders_service.common.handler.exception.CustomException;
 import com.example.orders_service.common.handler.exception.ErrorCode;
 import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
+import com.example.orders_service.orders.dto.response.OrderDetailsResponseDto;
 import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.entity.Orders;
 import com.example.orders_service.orders.enums.OrdersType;
@@ -75,6 +76,22 @@ public class OrdersService {
                 order.getPrice(),
                 order.getQuantity(),
                 order.getOrdersType()
+        );
+    }
+    /**
+     * 일반 상품 주문 조회
+     */
+    @Transactional(readOnly = true)
+    public OrderDetailsResponseDto getOrderDetails(Long orderId) {
+        Orders orders = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        return new OrderDetailsResponseDto(
+                orders.getId(),
+                orders.getUserId(),
+                orders.getProductId(),
+                orders.getPrice(),
+                orders.getQuantity(),
+                orders.getOrdersType()
         );
     }
 
