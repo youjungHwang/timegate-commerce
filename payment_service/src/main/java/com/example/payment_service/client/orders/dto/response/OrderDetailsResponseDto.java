@@ -1,6 +1,6 @@
-package com.example.orders_service.orders.dto.response;
+package com.example.payment_service.client.orders.dto.response;
 
-import com.example.orders_service.orders.enums.OrdersType;
+import com.example.payment_service.client.orders.enums.OrdersType;
 
 import java.math.BigDecimal;
 

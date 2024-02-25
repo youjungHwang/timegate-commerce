@@ -1,5 +1,7 @@
 package com.example.orders_service.orders.service;
 
+import com.example.orders_service.client.dto.request.OrdersStatusUpdateRequestDto;
+import com.example.orders_service.client.dto.response.OrderDetailsResponseDto;
 import com.example.orders_service.client.product.ProductClient;
 import com.example.orders_service.client.product.dto.response.ProductDetailsResponseDto;
 import com.example.orders_service.client.stock.StockClient;
@@ -8,7 +10,6 @@ import com.example.orders_service.client.stock.dto.response.StockResponseDto;
 import com.example.orders_service.common.handler.exception.CustomException;
 import com.example.orders_service.common.handler.exception.ErrorCode;
 import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
-import com.example.orders_service.orders.dto.response.OrderDetailsResponseDto;
 import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.entity.Orders;
@@ -86,6 +87,7 @@ public class OrdersService {
     public OrderDetailsResponseDto getOrderDetails(final Long orderId) {
         Orders orders = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
         return new OrderDetailsResponseDto(
                 orders.getId(),
                 orders.getUserId(),
@@ -124,6 +126,33 @@ public class OrdersService {
                 orders.getOrdersType(),
                 orders.getDeletedAt()
         );
+    }
+
+    /**
+     * 주문 상태
+     */
+    @Transactional(readOnly = true)
+    public OrderDetailsResponseDto getOrderStatus(final Long orderId){
+        Orders orders = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        return new OrderDetailsResponseDto(
+                orders.getId(),
+                orders.getUserId(),
+                orders.getProductId(),
+                orders.getPrice(),
+                orders.getQuantity(),
+                orders.getOrdersType()
+        );
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, OrdersStatusUpdateRequestDto ordersStatusUpdateRequestDto) {
+        OrdersType newStatus = ordersStatusUpdateRequestDto.ordersType();
+
+        Orders targetOrder = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        targetOrder.updateOrderStatus(newStatus);
     }
 
 

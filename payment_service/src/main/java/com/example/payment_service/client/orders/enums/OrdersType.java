@@ -1,4 +1,4 @@
-package com.example.orders_service.orders.enums;
+package com.example.payment_service.client.orders.enums;
 
 public enum OrdersType {
     INITIATED, // 주문 시작 (고객이 주문을 생성했지만, 아직 결제 과정을 진행하지 않은 상태)

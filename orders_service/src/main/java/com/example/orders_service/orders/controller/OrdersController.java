@@ -1,8 +1,9 @@
 package com.example.orders_service.orders.controller;
 
+import com.example.orders_service.client.dto.response.OrderDetailsResponseDto;
 import com.example.orders_service.common.dto.response.ApiResponse;
 import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
-import com.example.orders_service.orders.dto.response.OrderDetailsResponseDto;
+
 import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.service.OrdersService;
@@ -51,7 +52,7 @@ public class OrdersController {
     /**
      * 일반 상품 주문 취소
      */
-    @DeleteMapping("/orders/{orderId}")
+    @PatchMapping("/orders/{orderId}")
     public ResponseEntity<ApiResponse<OrderSoftDeleteResponseDto>> softDeleteOrder (
             @PathVariable Long orderId ) {
         OrderSoftDeleteResponseDto responseDto = ordersService.softDeleteOrder(orderId);
