@@ -44,7 +44,14 @@ public class Orders {
     public void cancelOrder(OrdersType type) {
         this.ordersType = type;
     }
+
+    /**
+     * ordersType 변경
+     */
     public void updateOrderStatus(OrdersType type) {
         this.ordersType = type;
+        if (type == OrdersType.CANCEL) {
+            this.deletedAt = LocalDateTime.now();
+        }
     }
 }

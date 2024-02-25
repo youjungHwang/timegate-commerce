@@ -9,6 +9,7 @@ import com.example.orders_service.common.handler.exception.CustomException;
 import com.example.orders_service.common.handler.exception.ErrorCode;
 import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
 import com.example.orders_service.orders.dto.response.OrderDetailsResponseDto;
+import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.entity.Orders;
 import com.example.orders_service.orders.enums.OrdersType;
@@ -60,7 +61,7 @@ public class OrdersService {
 
         // 20% 확률로 실패 CANCEL 상태 변경 -> [재고 서비스] 재고 증가 요청 (feign)
         if (new Random().nextInt(100) < 20) {
-            order.cancelOrder(OrdersType.CANCEL);
+            order.updateOrderStatus(OrdersType.CANCEL);
             stockClient.increaseProductStock(
                     new StockRequestDto(ordersCreateRequestDto.productId(), ordersCreateRequestDto.quantity()));
         } else {
@@ -82,7 +83,7 @@ public class OrdersService {
      * 일반 상품 주문 조회
      */
     @Transactional(readOnly = true)
-    public OrderDetailsResponseDto getOrderDetails(Long orderId) {
+    public OrderDetailsResponseDto getOrderDetails(final Long orderId) {
         Orders orders = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
         return new OrderDetailsResponseDto(
@@ -92,6 +93,36 @@ public class OrdersService {
                 orders.getPrice(),
                 orders.getQuantity(),
                 orders.getOrdersType()
+        );
+    }
+
+    /**
+     * 일반 상품 주문 취소
+     */
+    @Transactional
+    public OrderSoftDeleteResponseDto softDeleteOrder(final Long orderId) {
+        Orders orders = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        if (orders.getOrdersType() == OrdersType.CANCEL) {
+            throw new CustomException(ErrorCode.ORDER_ALREADY_CANCELLED);
+        }
+        if (orders.getOrdersType() == OrdersType.FAILED_CUSTOMER) {
+            throw new CustomException(ErrorCode.ORDER_PAYMENT_FAILED);
+        }
+        stockClient.increaseProductStock(
+                new StockRequestDto(orders.getProductId(), orders.getQuantity()));
+        orders.updateOrderStatus(OrdersType.CANCEL);
+
+        ordersRepository.save(orders);
+
+        return new OrderSoftDeleteResponseDto(
+                orders.getId(),
+                orders.getUserId(),
+                orders.getProductId(),
+                orders.getPrice(),
+                orders.getQuantity(),
+                orders.getOrdersType(),
+                orders.getDeletedAt()
         );
     }
 

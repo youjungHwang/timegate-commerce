@@ -3,6 +3,7 @@ package com.example.orders_service.orders.controller;
 import com.example.orders_service.common.dto.response.ApiResponse;
 import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
 import com.example.orders_service.orders.dto.response.OrderDetailsResponseDto;
+import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.service.OrdersService;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +48,19 @@ public class OrdersController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 일반 상품 주문 취소
+     */
+    @DeleteMapping("/orders/{orderId}")
+    public ResponseEntity<ApiResponse<OrderSoftDeleteResponseDto>> softDeleteOrder (
+            @PathVariable Long orderId ) {
+        OrderSoftDeleteResponseDto responseDto = ordersService.softDeleteOrder(orderId);
+        ApiResponse<OrderSoftDeleteResponseDto> response = new ApiResponse<>(
+                HttpStatus.OK,
+                "일반 상품 주문 취소 성공",
+                responseDto
+        );
+        return ResponseEntity.ok(response);
+    }
 
 }

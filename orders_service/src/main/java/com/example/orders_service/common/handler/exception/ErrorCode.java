@@ -12,6 +12,8 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 상품이 존재하지 않습니다"),
     STOCK_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "요청한 수량이 재고보다 많습니다. 사용 가능한 재고 수량을 확인하고 다시 시도해주세요."),
+    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "이미 취소된 주문입니다."),
+    ORDER_PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제 실패한 주문입니다"),
 
     // 5xx
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 있습니다.");
