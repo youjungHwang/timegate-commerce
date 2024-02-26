@@ -34,4 +34,9 @@ public class Payment extends BaseTimeEntity {
     private Long quantity;
 
     private LocalDateTime deletedAt;
+
+    public Payment withDeletedAt(LocalDateTime time) {
+        this.deletedAt = time;
+        return this;
+    }
 }

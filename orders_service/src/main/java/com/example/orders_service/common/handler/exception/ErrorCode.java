@@ -6,8 +6,8 @@ public enum ErrorCode {
     //4xx
     NOT_FOUND(HttpStatus.BAD_REQUEST, "요청사항을 찾지 못했습니다."),
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
-
     NOT_AVAILABLE_TIME(HttpStatus.BAD_REQUEST, "구매 가능 시간이 아닙니다"),
+    PRICE_MISMATCH(HttpStatus.BAD_REQUEST, "요청된 가격과 상품의 실제 가격이 일치하지 않습니다."),
 
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 상품이 존재하지 않습니다"),

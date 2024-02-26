@@ -8,10 +8,12 @@ import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto
 import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.service.OrdersService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/orders-service/api/v1")
 @RestController
@@ -52,16 +54,11 @@ public class OrdersController {
     /**
      * 일반 상품 주문 취소
      */
-    @PatchMapping("/orders/{orderId}")
-    public ResponseEntity<ApiResponse<OrderSoftDeleteResponseDto>> softDeleteOrder (
-            @PathVariable Long orderId ) {
+    @DeleteMapping("/orders/{orderId}/cancel")
+    public ResponseEntity<OrderSoftDeleteResponseDto> softDeleteOrder(
+            @PathVariable("orderId") Long orderId) {
         OrderSoftDeleteResponseDto responseDto = ordersService.softDeleteOrder(orderId);
-        ApiResponse<OrderSoftDeleteResponseDto> response = new ApiResponse<>(
-                HttpStatus.OK,
-                "일반 상품 주문 취소 성공",
-                responseDto
-        );
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(responseDto);
     }
 
 }
