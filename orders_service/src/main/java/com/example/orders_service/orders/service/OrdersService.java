@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Random;
 
@@ -43,6 +44,11 @@ public class OrdersService {
         // 상품 서비스에서 상품 디테일 정보 가져 옴 (feign) -> 없으면 예외처리
         ProductDetailsResponseDto productDetails = Optional.ofNullable(productClient.getProductDetails(ordersCreateRequestDto.productId()))
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 요청된 가격과 상품의 실제 가격 비교 -> 가격이 다르면 예외처리
+        if (ordersCreateRequestDto.price().compareTo(productDetails.price()) != 0) {
+            throw new CustomException(ErrorCode.PRICE_MISMATCH);
+        }
 
         // 주문 객체 생성
         Orders order = Orders.builder()
@@ -80,6 +86,7 @@ public class OrdersService {
                 order.getOrdersType()
         );
     }
+
     /**
      * 일반 상품 주문 조회
      */
@@ -109,6 +116,8 @@ public class OrdersService {
             throw new CustomException(ErrorCode.ORDER_ALREADY_CANCELLED);
         }
         if (orders.getOrdersType() == OrdersType.FAILED_CUSTOMER) {
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            System.out.println(orders.getOrdersType());
             throw new CustomException(ErrorCode.ORDER_PAYMENT_FAILED);
         }
         stockClient.increaseProductStock(

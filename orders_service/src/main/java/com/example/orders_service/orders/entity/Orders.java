@@ -1,7 +1,5 @@
 package com.example.orders_service.orders.entity;
 
-import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
-import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
 import com.example.orders_service.orders.enums.OrdersType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

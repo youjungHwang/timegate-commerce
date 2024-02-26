@@ -3,6 +3,7 @@ package com.example.payment_service.payment.service;
 import com.example.payment_service.client.orders.OrdersClient;
 import com.example.payment_service.client.orders.dto.request.OrdersStatusUpdateRequestDto;
 import com.example.payment_service.client.orders.dto.response.OrderDetailsResponseDto;
+import com.example.payment_service.client.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.payment_service.client.orders.enums.OrdersType;
 import com.example.payment_service.client.stock.StockClient;
 import com.example.payment_service.client.stock.dto.StockRequestDto;
@@ -10,12 +11,14 @@ import com.example.payment_service.common.handler.exception.CustomException;
 import com.example.payment_service.common.handler.exception.ErrorCode;
 import com.example.payment_service.payment.dto.request.PaymentAttemptRequestDto;
 import com.example.payment_service.payment.dto.response.PaymentAttemptResponseDto;
+import com.example.payment_service.payment.dto.response.PaymentSoftDeleteResponseDto;
 import com.example.payment_service.payment.entity.Payment;
 import com.example.payment_service.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 
 @RequiredArgsConstructor
@@ -63,4 +66,47 @@ public class PaymentService {
         return new PaymentAttemptResponseDto(savedPayment.getId(), savedPayment.getUserId(), savedPayment.getOrderId(), savedPayment.getPrice(), savedPayment.getQuantity());
 
     }
+
+    /**
+     * 결제 취소
+     */
+    @Transactional
+    public PaymentSoftDeleteResponseDto softDeletePayment(final Long paymentId){
+        //if) 결제ID를 통해 조회 → 없으면 예외처리, 존재하지 않는 결제 내역입니다.
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        System.out.println(paymentId);
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        //if) 결제ID가 있으면, 결제ID안에 deleted_at이 null이 아니면 이미 취소된 결제입니다.
+        if(payment.getDeletedAt() != null) {
+            throw new CustomException(ErrorCode.DELETED_PAYMENT);
+        }
+
+        //결제 내역에 주문ID가 있을텐데 그럼, orderClient로 주문ID를 보낸다.(취소 요청)(feign) - 이건 [주문 취소]를 호출하면 된다.
+        OrderSoftDeleteResponseDto orderResponse = orderClient.softDeleteOrder(payment.getOrderId());
+
+        //deleted_at(소프트 딜리트) → 결제DB에 데이터 생성에 업데이트
+        payment = payment.withDeletedAt(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        return new PaymentSoftDeleteResponseDto(
+                payment.getId(),
+                payment.getUserId(),
+                payment.getOrderId(),
+                payment.getPrice(),
+                payment.getQuantity(),
+                payment.getDeletedAt()
+        );
+
+    }
+
+
+
+
+
+
+
+
+
 }

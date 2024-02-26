@@ -2,6 +2,7 @@ package com.example.orders_service.client.controller;
 
 import com.example.orders_service.client.dto.request.OrdersStatusUpdateRequestDto;
 import com.example.orders_service.client.dto.response.OrderDetailsResponseDto;
+import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.orders_service.orders.service.OrdersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,13 @@ public class InternalOrdersController {
         ordersService.updateOrderStatus(orderId, requestDto);
 
         return ResponseEntity.ok().body("status change success");
+    }
+
+    @DeleteMapping("/{orderId}/cancel")
+    public ResponseEntity<OrderSoftDeleteResponseDto> softDeleteOrder(
+            @PathVariable("orderId") Long orderId) {
+        OrderSoftDeleteResponseDto responseDto = ordersService.softDeleteOrder(orderId);
+        return ResponseEntity.ok().body(responseDto);
     }
 
 }
