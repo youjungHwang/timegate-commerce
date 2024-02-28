@@ -1,6 +1,9 @@
 package com.example.orders_service.orders.entity;
 
-import com.example.orders_service.orders.enums.OrdersType;
+import com.example.orders_service.common.entity.BaseTimeEntity;
+import com.example.orders_service.common.handler.exception.CustomException;
+import com.example.orders_service.common.handler.exception.ErrorCode;
+import com.example.orders_service.orders.enums.OrderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Orders {
+public class Orders extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orders_id")
@@ -35,20 +38,19 @@ public class Orders {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrdersType ordersType;
+    private OrderType ordersType;
 
     private LocalDateTime deletedAt;
-
-    public void cancelOrder(OrdersType type) {
-        this.ordersType = type;
-    }
 
     /**
      * ordersType 변경
      */
-    public void updateOrderStatus(OrdersType type) {
-        this.ordersType = type;
-        if (type == OrdersType.CANCEL) {
+    public void updateOrderStatus(OrderType newType) {
+        if (newType == null || this.ordersType == newType) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+        this.ordersType = newType;
+        if (newType == OrderType.CANCEL) {
             this.deletedAt = LocalDateTime.now();
         }
     }

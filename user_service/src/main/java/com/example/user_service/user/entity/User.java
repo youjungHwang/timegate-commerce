@@ -18,9 +18,5 @@ public class User extends BaseTimeEntity {
     @Column(unique=true)
     private String email;
 
-    public User(String email) {
-        this.email = email;
-    }
-
 }
 
