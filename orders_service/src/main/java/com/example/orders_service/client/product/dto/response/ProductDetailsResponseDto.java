@@ -14,5 +14,4 @@ public record ProductDetailsResponseDto(Long productId,
                                         LocalDateTime availableUntil) {
 }
 
-// 일반 상품, 예약 상품 공통 사용
-// 만약 일반 상품 타입이면, availavle 시간은 null처리 -> 안나오게
+

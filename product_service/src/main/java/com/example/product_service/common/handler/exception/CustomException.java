@@ -2,7 +2,6 @@ package com.example.product_service.common.handler.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-
 @Getter
 public class CustomException extends RuntimeException{
     private final ErrorCode errorCode;

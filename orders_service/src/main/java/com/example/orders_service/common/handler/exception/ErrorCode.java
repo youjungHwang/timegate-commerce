@@ -14,6 +14,7 @@ public enum ErrorCode {
     STOCK_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "요청한 수량이 재고보다 많습니다. 사용 가능한 재고 수량을 확인하고 다시 시도해주세요."),
     ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "이미 취소된 주문입니다."),
     ORDER_PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제 실패한 주문입니다"),
+    INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 주문 상태 변경입니다."),
 
     // 5xx
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 있습니다.");

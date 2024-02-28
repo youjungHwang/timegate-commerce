@@ -1,9 +1,9 @@
 package com.example.orders_service.client.controller;
 
-import com.example.orders_service.client.dto.request.OrdersStatusUpdateRequestDto;
+import com.example.orders_service.client.dto.request.OrderStatusUpdateRequestDto;
 import com.example.orders_service.client.dto.response.OrderDetailsResponseDto;
 import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
-import com.example.orders_service.orders.service.OrdersService;
+import com.example.orders_service.orders.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/orders")
 @RestController
-public class InternalOrdersController {
-    private final OrdersService ordersService;
+public class InternalOrderController {
+    private final OrderService ordersService;
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDetailsResponseDto> getOrderDetails(
@@ -23,7 +23,7 @@ public class InternalOrdersController {
 
     @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(
-            @PathVariable("orderId") final Long orderId, @RequestBody OrdersStatusUpdateRequestDto requestDto) {
+            @PathVariable("orderId") final Long orderId, @RequestBody OrderStatusUpdateRequestDto requestDto) {
         ordersService.updateOrderStatus(orderId, requestDto);
 
         return ResponseEntity.ok().body("status change success");

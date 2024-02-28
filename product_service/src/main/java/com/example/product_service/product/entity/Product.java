@@ -3,7 +3,6 @@ package com.example.product_service.product.entity;
 import com.example.product_service.common.entity.BaseTimeEntity;
 import com.example.product_service.product.dto.request.ProductUpdateRequestDto;
 import com.example.product_service.product.dto.request.ReservedProductUpdateRequestDto;
-import com.example.product_service.product.dto.response.ProductDetailsResponseDto;
 import com.example.product_service.product.enums.ProductType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

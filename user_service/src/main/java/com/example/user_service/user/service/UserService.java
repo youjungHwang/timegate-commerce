@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+
     @Transactional
     public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto) {
         if (signUpRequestDto.email() == null || signUpRequestDto.email().isBlank()) {

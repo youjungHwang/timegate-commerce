@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @ControllerAdvice
 public class ControllerExceptionHandler {
-
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         ErrorResponse response = ErrorResponse.builder()
