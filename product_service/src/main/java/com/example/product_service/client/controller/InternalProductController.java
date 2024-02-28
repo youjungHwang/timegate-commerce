@@ -14,15 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class InternalProductController {
     private final ProductService productService;
-
-    /**
-     * [order_service] createOrder 주문 생성에서 사용
-     */
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetailsResponseDto> getProductDetails(
             @PathVariable("productId") final Long productId) {
         ProductDetailsResponseDto productDetailsResponse = productService.getProductDetails(productId);
         return ResponseEntity.ok(productDetailsResponse);
     }
-
 }

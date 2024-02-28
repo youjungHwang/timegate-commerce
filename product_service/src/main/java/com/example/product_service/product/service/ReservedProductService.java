@@ -25,6 +25,7 @@ public class ReservedProductService {
         }
         return products;
     }
+
     @Transactional(readOnly = true)
     public Product getReservedProductById(Long productId) {
         return productRepository.findById(productId)

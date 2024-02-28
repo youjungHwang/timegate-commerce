@@ -25,15 +25,6 @@ public class ProductController {
 
     private final ProductService productService;
     private final ReservedProductService reservedProductService;
-
-    /**
-     * [확인]
-     * 일반 상품 생성
-     * 일반 상품 전체 조회
-     * 일반 상품 상세 조회
-     * 일반 상품 정보 수정
-     * 일반 상품 삭제
-     */
     @PostMapping("/products")
     public ResponseEntity<ApiResponse<ProductCreateResponseDto>> createProduct(
             @RequestBody final ProductCreateRequestDto productCreateRequestDto) {
@@ -106,7 +97,7 @@ public class ProductController {
     }
 
     /**
-     * 예약 상품 -  등록 추가 필요
+     * 예약 상품 -  TODO: 예약 상품 생성
      */
     @GetMapping("/reserved-products")
     public ResponseEntity<ApiResponse<Page<Product>>> getAllReservedProducts(Pageable pageable) {
@@ -142,6 +133,7 @@ public class ProductController {
         );
         return ResponseEntity.ok(response);
     }
+
     @DeleteMapping("/reserved-products/{productId}")
     public ResponseEntity<ApiResponse<Void>> deleteReservedProduct(@PathVariable final Long productId) {
         reservedProductService.deleteReservedProduct(productId);

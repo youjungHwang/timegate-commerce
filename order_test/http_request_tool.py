@@ -15,8 +15,8 @@ def send_http_request(buyerNum):
     # "quantity" : 1
     # }
 
-        # POST 요청을 보냄(!!!!!!!!!!!!!!아이템 번호 바꿔야함)
-        response = requests.post(order_url, json={"userId": buyerNum, "productId": 1, "price": 1000, "quantity":1})
+        # POST 요청을 보냄(아이템 번호 매번 바꿔야함)
+        response = requests.post(order_url, json={"userId": buyerNum, "productId": 3, "price": 1000, "quantity":1})
         # print(f"Request to {order_url} with buyerNum {buyerNum} completed with status code {response.status_code}")
 
         # 응답을 JSON 형식으로 파싱

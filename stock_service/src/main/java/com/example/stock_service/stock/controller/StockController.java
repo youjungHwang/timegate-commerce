@@ -24,6 +24,7 @@ public class StockController {
         );
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/reserved-products/{productId}/stock")
     public ResponseEntity<ApiResponse<Long>> getReservedProductStock(@PathVariable final Long productId) {
         Long currentStockCount = stockService.getReservedProductStock(productId);

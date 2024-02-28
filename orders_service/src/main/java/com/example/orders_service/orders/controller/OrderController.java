@@ -2,11 +2,11 @@ package com.example.orders_service.orders.controller;
 
 import com.example.orders_service.client.dto.response.OrderDetailsResponseDto;
 import com.example.orders_service.common.dto.response.ApiResponse;
-import com.example.orders_service.orders.dto.request.OrdersCreateRequestDto;
+import com.example.orders_service.orders.dto.request.OrderCreateRequestDto;
 
 import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
-import com.example.orders_service.orders.dto.response.OrdersCreateResponseDto;
-import com.example.orders_service.orders.service.OrdersService;
+import com.example.orders_service.orders.dto.response.OrderCreateResponseDto;
+import com.example.orders_service.orders.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,18 +17,18 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/orders-service/api/v1")
 @RestController
-public class OrdersController {
+public class OrderController {
 
-    private final OrdersService ordersService;
+    private final OrderService ordersService;
 
     /**
      * 일반 상품 주문 생성 (결제 페이지 진입 시 요청)
      */
     @PostMapping("/orders")
-    public ResponseEntity<ApiResponse<OrdersCreateResponseDto>> createOrder(
-            @RequestBody OrdersCreateRequestDto ordersCreateRequestDto) {
-        OrdersCreateResponseDto createdOrdersDto = ordersService.createOrder(ordersCreateRequestDto);
-        ApiResponse<OrdersCreateResponseDto> response = new ApiResponse<>(
+    public ResponseEntity<ApiResponse<OrderCreateResponseDto>> createOrder(
+            @RequestBody OrderCreateRequestDto ordersCreateRequestDto) {
+        OrderCreateResponseDto createdOrdersDto = ordersService.createOrder(ordersCreateRequestDto);
+        ApiResponse<OrderCreateResponseDto> response = new ApiResponse<>(
                 HttpStatus.CREATED,
                 "일반 상품 주문 생성 성공",
                 createdOrdersDto
