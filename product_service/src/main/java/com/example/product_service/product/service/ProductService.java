@@ -37,19 +37,21 @@ public class ProductService {
                 .productName(requestDto.productName())
                 .price(requestDto.price())
                 .productType(requestDto.productType())
+                .availableFrom(requestDto.availableFrom())
+                .availableUntil(requestDto.availableUntil())
                 .build();
 
         Product savedProduct = productRepository.save(product);
 
-        ProductCreateResponseDto responseDto = new ProductCreateResponseDto(
+        return new ProductCreateResponseDto(
                 savedProduct.getId(),
                 savedProduct.getProductName(),
                 savedProduct.getPrice(),
                 stockCreateResponseDto.stock(),
-                savedProduct.getProductType()
+                savedProduct.getProductType(),
+                savedProduct.getAvailableFrom(),
+                savedProduct.getAvailableUntil()
         );
-
-        return responseDto;
     }
 
     @Transactional(readOnly = true)
@@ -85,12 +87,6 @@ public class ProductService {
 
     }
 
-    @Transactional(readOnly = true)
-    public Product getProductById(Long productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
-
     @Transactional
     public ProductUpdateResponseDto updateProduct(
             Long productId,
@@ -122,4 +118,5 @@ public class ProductService {
         product.softDelete();
         productRepository.save(product);
     }
+
 }
