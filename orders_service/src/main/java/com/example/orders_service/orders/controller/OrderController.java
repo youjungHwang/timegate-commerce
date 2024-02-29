@@ -22,7 +22,7 @@ public class OrderController {
     private final OrderService ordersService;
 
     /**
-     * 일반 상품 주문 생성 (결제 페이지 진입 시 요청)
+     * 주문 생성 (결제 페이지 진입 시 요청)
      */
     @PostMapping("/orders")
     public ResponseEntity<ApiResponse<OrderCreateResponseDto>> createOrder(
@@ -30,14 +30,14 @@ public class OrderController {
         OrderCreateResponseDto createdOrdersDto = ordersService.createOrder(ordersCreateRequestDto);
         ApiResponse<OrderCreateResponseDto> response = new ApiResponse<>(
                 HttpStatus.CREATED,
-                "일반 상품 주문 생성 성공",
+                "주문 생성 성공",
                 createdOrdersDto
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * 일반 상품 주문 조회
+     * 주문 조회
      */
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<ApiResponse<OrderDetailsResponseDto>> getOrderDetails(
@@ -45,14 +45,14 @@ public class OrderController {
         OrderDetailsResponseDto responseDto = ordersService.getOrderDetails(orderId);
         ApiResponse<OrderDetailsResponseDto> response = new ApiResponse<>(
                 HttpStatus.OK,
-                "일반 상품 주문 조회 성공",
+                "주문 조회 성공",
                 responseDto
         );
         return ResponseEntity.ok(response);
     }
 
     /**
-     * 일반 상품 주문 취소
+     * 주문 취소
      */
     @DeleteMapping("/orders/{orderId}/cancel")
     public ResponseEntity<OrderSoftDeleteResponseDto> softDeleteOrder(
