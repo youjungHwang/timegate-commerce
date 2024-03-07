@@ -14,11 +14,14 @@ import com.example.product_service.product.dto.response.ProductUpdateResponseDto
 import com.example.product_service.product.entity.Product;
 import com.example.product_service.product.enums.ProductType;
 import com.example.product_service.product.repository.ProductRepository;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 @RequiredArgsConstructor
 @Service
@@ -56,7 +59,8 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(Pageable pageable) {
-        Page<Product> products = productRepository.findAllByProductTypeAndDeletedAtIsNull(ProductType.REGULAR, pageable);
+        Page<Product> products =
+                productRepository.findAllByProductTypeAndDeletedAtIsNull(ProductType.REGULAR, pageable);
         if (products.isEmpty()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
         }
@@ -65,32 +69,43 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDetailsResponseDto getProductDetails(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        try {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (product.getDeletedAt() != null) {
-            throw new CustomException(ErrorCode.DELETED_ITEM);
+            if (product.getDeletedAt() != null) {
+                throw new CustomException(ErrorCode.DELETED_ITEM);
+            }
+
+            // StockClient 재고 조회 (feign)
+            StockResponseDto stockResponse = stockClient.getProductStocks(productId);
+
+            return new ProductDetailsResponseDto(
+                    product.getId(),
+                    product.getProductName(),
+                    product.getPrice(),
+                    stockResponse.stock(),
+                    product.getProductType(),
+                    product.getAvailableFrom(),
+                    product.getAvailableUntil()
+            );
+        } catch (FeignException e) {
+            throw new CustomException(ErrorCode.EXTERNAL_SERVICE_ERROR);
         }
-
-        // StockClient 재고 조회 (feign)
-        StockResponseDto stockResponse = stockClient.getProductStocks(productId);
-
-        return new ProductDetailsResponseDto(
-                product.getId(),
-                product.getProductName(),
-                product.getPrice(),
-                stockResponse.stock(),
-                product.getProductType(),
-                product.getAvailableFrom(),
-                product.getAvailableUntil()
-        );
-
     }
 
     @Transactional
     public ProductUpdateResponseDto updateProduct(
             Long productId,
             ProductUpdateRequestDto productUpdateRequestDto) {
+
+        if (productUpdateRequestDto.productName() == null || productUpdateRequestDto.productName().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        if (productUpdateRequestDto.price() != null && productUpdateRequestDto.price().compareTo(BigDecimal.ZERO) < 0) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -104,6 +119,7 @@ public class ProductService {
                 product.getProductType()
         );
     }
+
 
     @Transactional
     public void deleteProduct(Long productId) {

@@ -11,7 +11,13 @@ public enum ErrorCode {
     DELETED_ITEM(HttpStatus.BAD_REQUEST, "이미 삭제된 항목입니다."),
 
     // 5xx
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 있습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 있습니다."),
+
+    // Feign 클라이언트 통신 실패 관련 에러 코드
+    EXTERNAL_SERVICE_ERROR(HttpStatus.BAD_GATEWAY, "외부 서비스 호출에 실패했습니다."),
+    EXTERNAL_SERVICE_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "외부 서비스 응답 시간 초과입니다."),
+    EXTERNAL_SERVICE_CLIENT_ERROR(HttpStatus.BAD_GATEWAY, "외부 서비스에서 클라이언트 오류가 발생했습니다."),
+    EXTERNAL_SERVICE_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "외부 서비스에서 서버 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String message;
