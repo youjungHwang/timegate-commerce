@@ -19,18 +19,7 @@ public class StockController {
         Long currentStockCount = stockService.getProductStock(productId);
         ApiResponse<Long> response = new ApiResponse<>(
                 HttpStatus.OK,
-                "일반 상품 남은 재고 조회 성공",
-                currentStockCount
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/reserved-products/{productId}/stock")
-    public ResponseEntity<ApiResponse<Long>> getReservedProductStock(@PathVariable final Long productId) {
-        Long currentStockCount = stockService.getReservedProductStock(productId);
-        ApiResponse<Long> response = new ApiResponse<>(
-                HttpStatus.OK,
-                "예약 상품 남은 재고 조회 성공",
+                "상품 남은 재고 조회 성공",
                 currentStockCount
         );
         return ResponseEntity.ok(response);
