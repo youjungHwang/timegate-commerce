@@ -1,6 +1,15 @@
 import pymysql
 from datetime import datetime
 
+
+# 테이블 초기화 함수
+def truncate_table(connection, table_name):
+    cursor = connection.cursor()
+    cursor.execute(f"TRUNCATE TABLE {table_name}")
+    connection.commit()
+    print(f"{table_name} db 초기화 성공")
+    cursor.close()
+
 def insert_products():
     try:
         # 데이터베이스 연결 설정
@@ -11,6 +20,10 @@ def insert_products():
             user='youjung',
             password='timegate2249207'
         )
+        
+        # product 테이블 초기화
+        truncate_table(connection, 'product')
+
         cursor = connection.cursor()
 
         # 일반 상품 등록
@@ -18,7 +31,7 @@ def insert_products():
         INSERT INTO product (product_name, price, product_type, available_from, available_until) 
         VALUES (%s, %s, %s, %s, %s)
         """
-        normal_product_values = ("일반 상품", 1000, "REGULAR", None, None)
+        normal_product_values = ("일반 상품", 12500, "REGULAR", None, None)
         cursor.execute(normal_product_query, normal_product_values)
         normal_product_id = cursor.lastrowid
 
@@ -56,18 +69,22 @@ def insert_stocks(firstProductId, secondProductId):
             user='youjung',
             password='timegate2249207'
         )
+
+        # stock 테이블 초기화
+        truncate_table(connection, 'stock')
+        
         cursor = connection.cursor()
 
         # 재고 등록
         stock_query = "INSERT INTO stock (product_id, stock) VALUES (%s, %s)"
-        cursor.execute(stock_query, (firstProductId, 10))
+        cursor.execute(stock_query, (firstProductId, 100000))
 
         retrieve_query = "SELECT * FROM stock WHERE product_id = %s"
         cursor.execute(retrieve_query, (firstProductId,))
         inserted_data = cursor.fetchone()
         print(f"삽입된 데이터: {inserted_data}")
 
-        cursor.execute(stock_query, (secondProductId, 10))
+        cursor.execute(stock_query, (secondProductId, 100000))
         cursor.execute(retrieve_query, (secondProductId,))
         inserted_data = cursor.fetchone()
         print(f"삽입된 데이터: {inserted_data}")

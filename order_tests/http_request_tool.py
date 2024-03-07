@@ -1,6 +1,51 @@
+import pymysql
 import requests
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+
+# 주문, 결제 테이블 초기화
+def truncate_table():
+    try:
+        order_table = "orders"
+
+        connection = pymysql.connect(
+            host='localhost',
+            port=13311,
+            database='orders_database',
+            user='youjung',
+            password='timegate2249207'
+        )
+
+        cursor = connection.cursor()
+        cursor.execute(f"TRUNCATE TABLE {order_table}")
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        payment_table = "payment"
+        connection = pymysql.connect(
+            host='localhost',
+            port=13312,
+            database='payment_database',
+            user='youjung',
+            password='timegate2249207'
+        )
+
+        cursor = connection.cursor()
+        cursor.execute(f"TRUNCATE TABLE {payment_table}")
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        print("주문, 결제 db 초기화 성공")
+
+    except pymysql.MySQLError as e:
+        print("데이터베이스 연결 또는 쿼리 실행 중 오류 발생:", e)
+    
+    finally:
+        print("MySQL 연결 종료.")
+    
+    
 
 def send_http_request(buyerNum):
     order_url = "http://localhost:8083/orders-service/api/v1/orders"
@@ -16,7 +61,7 @@ def send_http_request(buyerNum):
     # }
 
         # POST 요청을 보냄(아이템 번호 매번 바꿔야함)
-        response = requests.post(order_url, json={"userId": buyerNum, "productId": 3, "price": 1000, "quantity":1})
+        response = requests.post(order_url, json={"userId": buyerNum, "productId": 1, "price": 12500, "quantity":1})
         # print(f"Request to {order_url} with buyerNum {buyerNum} completed with status code {response.status_code}")
 
         # 응답을 JSON 형식으로 파싱
@@ -56,8 +101,11 @@ def send_http_request(buyerNum):
         print(f"Error sending request to {order_url}: {e}")
 
 def main():
+    # 테이블 초기화
+    truncate_table()
+
     # Set the number of concurrent requests (N)
-    num_requests = 100  # buyerNum을 1부터 10000까지 보낼 것이므로 요청 수를 10000으로 설정
+    num_requests = 1000  # buyerNum을 1부터 1000까지 보낼 것이므로 요청 수를 1000으로 설정
 
     start_time = datetime.now()  # 코드 실행 시작 시간
 
