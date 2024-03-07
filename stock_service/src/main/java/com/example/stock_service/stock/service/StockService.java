@@ -24,14 +24,9 @@ public class StockService {
         return stocks.getStock();
     }
 
-    @Transactional(readOnly = true)
-    public Long getReservedProductStock(final Long productId) {
-        Stock stocks = stockRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-
-        return stocks.getStock();
-    }
-
+    /**
+     * 1. 요청이 한 개씩 들어오는 상황 -> 요청이 동시에 여러개가 온다면?
+     */
     @Transactional
     public void decreaseStock(final Long productId, final Long quantity) {
         Stock stock = stockRepository.findById(productId)
@@ -92,6 +87,10 @@ public class StockService {
      */
     @Transactional
     public StockResponseDto increaseProductStock(StockRequestDto requestDto) {
+        if (requestDto.stock() <= 0) {
+            throw new CustomException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+
         Stock stock = stockRepository.findById(requestDto.productId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -114,6 +113,10 @@ public class StockService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         Long newStockQuantity = stock.getStock() - requestDto.stock();
+
+        if(newStockQuantity < 0) {
+            throw new CustomException(ErrorCode.STOCK_NOT_ENOUGH);
+        }
 
         Stock updatedStock = stockRepository.save(Stock.builder()
                 .productId(stock.getProductId())

@@ -11,6 +11,8 @@ public enum ErrorCode {
     PRODUCT_STOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "상품에 대한 재고정보를 찾을 수 없습니다."),
     STOCK_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "요청된 수량이 재고보다 많습니다."),
     STOCK_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "해당 상품의 재고가 이미 존재합니다."),
+    INVALID_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "잘못된 재고 수량입니다."),
+
 
     // 5xx
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 있습니다.");
