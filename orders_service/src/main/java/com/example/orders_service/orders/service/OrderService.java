@@ -10,6 +10,7 @@ import com.example.orders_service.client.stock.dto.request.StockRequestDto;
 import com.example.orders_service.client.stock.dto.response.StockResponseDto;
 import com.example.orders_service.common.handler.exception.CustomException;
 import com.example.orders_service.common.handler.exception.ErrorCode;
+import com.example.orders_service.common.util.RandomDecisionMaker;
 import com.example.orders_service.orders.dto.request.OrderCreateRequestDto;
 import com.example.orders_service.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.orders_service.orders.dto.response.OrderCreateResponseDto;
@@ -30,6 +31,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
     private final StockClient stockClient;
+    private final RandomDecisionMaker randomDecisionMaker;
 
     /**
      * 주문 생성 (결제 페이지(장바구니) 진입 시 요청)
@@ -74,7 +76,7 @@ public class OrderService {
         orderRepository.save(order);
 
         // 20% 확률로 실패 CANCEL 상태 변경 -> [재고 서비스] 재고 증가 요청 (feign)
-        if (new Random().nextInt(100) < 20) {
+        if (randomDecisionMaker.shouldFailOrder()) {
             order.updateOrderStatus(OrderType.CANCEL);
             stockClient.increaseProductStock(
                     new StockRequestDto(ordersCreateRequestDto.productId(), ordersCreateRequestDto.quantity()));
