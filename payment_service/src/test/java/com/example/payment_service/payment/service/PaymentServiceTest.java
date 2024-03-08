@@ -4,7 +4,10 @@ import com.example.payment_service.client.orders.OrdersClient;
 import com.example.payment_service.client.orders.dto.response.OrderDetailsResponseDto;
 import com.example.payment_service.client.orders.dto.response.OrderSoftDeleteResponseDto;
 import com.example.payment_service.client.orders.enums.OrderType;
+import com.example.payment_service.client.stock.StockClient;
+import com.example.payment_service.client.stock.dto.StockRequestDto;
 import com.example.payment_service.common.handler.exception.CustomException;
+import com.example.payment_service.common.util.RandomDecisionMaker;
 import com.example.payment_service.payment.dto.request.PaymentAttemptRequestDto;
 import com.example.payment_service.payment.dto.response.PaymentAttemptResponseDto;
 import com.example.payment_service.payment.dto.response.PaymentSoftDeleteResponseDto;
@@ -40,14 +43,15 @@ class PaymentServiceTest {
     @Mock
     private OrdersClient ordersClient;
 
+    @Mock
+    private StockClient stockClient;
+
+    @Mock
+    private RandomDecisionMaker randomDecisionMaker;
+
     @Nested
     @DisplayName("결제 시도 테스트")
     class AttemptPaymentTests {
-
-        /**
-         * TODO: 랜덤 로직 관련 처리
-         *  랜덤 요소를 배제하고 나머지 부분들이 제대로 동작하는지 확인
-         */
 
         @Test
         @DisplayName("결제 시도 성공")
@@ -102,6 +106,86 @@ class PaymentServiceTest {
             assertThatThrownBy(() -> paymentService.attemptPayment(requestDto))
                     .isInstanceOf(CustomException.class)
                     .hasMessageContaining("주문이 진행 중인 상태가 아닙니다.");
+        }
+
+        @Test
+        @DisplayName("결제 실패 시 재고 증가 요청 확인")
+        void attemptPayment_increasesStockOnFailure() {
+            // given
+            Long orderId = 1L;
+            PaymentAttemptRequestDto requestDto = new PaymentAttemptRequestDto(orderId);
+            OrderDetailsResponseDto orderDetails = new OrderDetailsResponseDto(
+                    orderId, 1L, 1L, BigDecimal.valueOf(500),
+                    5L, OrderType.IN_PROGRESS);
+
+            // mocking
+            when(ordersClient.getOrderDetails(requestDto.orderId())).thenReturn(orderDetails);
+            when(randomDecisionMaker.shouldFailPayment()).thenReturn(true);
+
+            // when, then
+            assertThrows(CustomException.class, () -> paymentService.attemptPayment(requestDto));
+            verify(stockClient).increaseProductStock(any(StockRequestDto.class));
+        }
+
+        @Test
+        @DisplayName("결제 실패 시 주문 상태를 FAILED_CUSTOMER로 업데이트")
+        void attemptPayment_updatesOrderStatusToFailedCustomerOnFailure() {
+            // given
+            Long orderId = 1L;
+            PaymentAttemptRequestDto requestDto = new PaymentAttemptRequestDto(orderId);
+            OrderDetailsResponseDto orderDetails = new OrderDetailsResponseDto(
+                    orderId, 1L, 1L, BigDecimal.valueOf(500),
+                    5L, OrderType.IN_PROGRESS
+            );
+
+            // mocking
+            when(ordersClient.getOrderDetails(requestDto.orderId()))
+                    .thenReturn(orderDetails);
+            when(randomDecisionMaker.shouldFailPayment()).thenReturn(true);
+
+            // when, then
+            assertThrows(CustomException.class, () -> paymentService.attemptPayment(requestDto));
+            verify(ordersClient).updateOrderStatus(eq(orderId), argThat(request ->
+                    request.ordersType().equals(OrderType.FAILED_CUSTOMER)));
+        }
+
+        @Test
+        @DisplayName("결제 성공 시 주문 상태를 COMPLETED로 업데이트")
+        void attemptPayment_updatesOrderStatusToCompletedOnSuccess() {
+            // given
+            Long orderId = 1L;
+            PaymentAttemptRequestDto requestDto = new PaymentAttemptRequestDto(orderId);
+            OrderDetailsResponseDto orderDetails = new OrderDetailsResponseDto(
+                    orderId, 1L, 1L, BigDecimal.valueOf(500),
+                    5L, OrderType.IN_PROGRESS
+            );
+
+            Payment newPayment = Payment.builder()
+                    .userId(orderDetails.userId())
+                    .orderId(orderDetails.orderId())
+                    .price(orderDetails.price())
+                    .quantity(orderDetails.quantity())
+                    .build();
+
+            // mocking
+            when(ordersClient.getOrderDetails(requestDto.orderId()))
+                    .thenReturn(orderDetails);
+            when(paymentRepository.save(any(Payment.class)))
+                    .thenReturn(newPayment);
+            when(randomDecisionMaker.shouldFailPayment()).thenReturn(false);
+
+            // when
+            PaymentAttemptResponseDto responseDto = paymentService.attemptPayment(requestDto);
+
+            // then
+            verify(ordersClient).updateOrderStatus(eq(orderId), argThat(request ->
+                    request.ordersType().equals(OrderType.COMPLETED)));
+
+            assertNotNull(responseDto);
+            assertEquals(orderDetails.userId(), responseDto.userId());
+            assertEquals(orderId, responseDto.orderId());
+            assertEquals(orderDetails.price(), responseDto.price());
+            assertEquals(orderDetails.quantity(), responseDto.quantity());
         }
 
     }
