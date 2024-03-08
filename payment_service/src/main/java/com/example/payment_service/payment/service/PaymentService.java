@@ -9,6 +9,7 @@ import com.example.payment_service.client.stock.StockClient;
 import com.example.payment_service.client.stock.dto.StockRequestDto;
 import com.example.payment_service.common.handler.exception.CustomException;
 import com.example.payment_service.common.handler.exception.ErrorCode;
+import com.example.payment_service.common.util.RandomDecisionMaker;
 import com.example.payment_service.payment.dto.request.PaymentAttemptRequestDto;
 import com.example.payment_service.payment.dto.response.PaymentAttemptResponseDto;
 import com.example.payment_service.payment.dto.response.PaymentSoftDeleteResponseDto;
@@ -27,6 +28,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrdersClient orderClient;
     private final StockClient stockClient;
+    private final RandomDecisionMaker randomDecisionMaker;
 
     /**
      * 결제 시도
@@ -42,7 +44,7 @@ public class PaymentService {
         }
 
         // 20%확률로 결제 실패 이탈, 상태 변경 FAILED_CUSTOMER → 재고 증가요청(StockClient)
-        if (new Random().nextInt(100) < 20) {
+        if (randomDecisionMaker.shouldFailPayment()) {
             // 주문 상태를 FAILED_CUSTOMER로 변경
             orderClient.updateOrderStatus(targetOrder.orderId(),
                     new OrderStatusUpdateRequestDto(OrderType.FAILED_CUSTOMER));
