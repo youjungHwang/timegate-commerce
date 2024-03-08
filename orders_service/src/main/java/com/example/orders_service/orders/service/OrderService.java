@@ -27,7 +27,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 @Service
 public class OrderService {
-    private final OrderRepository ordersRepository;
+    private final OrderRepository orderRepository;
     private final ProductClient productClient;
     private final StockClient stockClient;
 
@@ -36,7 +36,7 @@ public class OrderService {
      */
     @Transactional
     public OrderCreateResponseDto createOrder(final OrderCreateRequestDto ordersCreateRequestDto) {
-        // 상품 서비스에서 상품 디테일 정보 가져 옴 (feign) -> 없으면 예외처리
+        // [상품 서비스] 상품 디테일 정보 가져 옴 (feign)
         ProductDetailsResponseDto productDetails = Optional.ofNullable(productClient.getProductDetails(ordersCreateRequestDto.productId()))
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -71,7 +71,7 @@ public class OrderService {
                 .build();
 
         // 주문 객체 저장
-        ordersRepository.save(order);
+        orderRepository.save(order);
 
         // 20% 확률로 실패 CANCEL 상태 변경 -> [재고 서비스] 재고 증가 요청 (feign)
         if (new Random().nextInt(100) < 20) {
@@ -95,11 +95,11 @@ public class OrderService {
     }
 
     /**
-     * 일반 상품 주문 조회
+     * 상품 주문 조회
      */
     @Transactional(readOnly = true)
     public OrderDetailsResponseDto getOrderDetails(final Long orderId) {
-        Orders orders = ordersRepository.findById(orderId)
+        Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         return new OrderDetailsResponseDto(
@@ -113,11 +113,11 @@ public class OrderService {
     }
 
     /**
-     * 일반 상품 주문 취소
+     * 상품 주문 취소
      */
     @Transactional
     public OrderSoftDeleteResponseDto softDeleteOrder(final Long orderId) {
-        Orders orders = ordersRepository.findById(orderId)
+        Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         if (orders.getOrdersType() == OrderType.CANCEL) {
@@ -133,7 +133,7 @@ public class OrderService {
 
         orders.updateOrderStatus(OrderType.CANCEL);
 
-        ordersRepository.save(orders);
+        orderRepository.save(orders);
 
         return new OrderSoftDeleteResponseDto(
                 orders.getId(),
@@ -150,10 +150,11 @@ public class OrderService {
     public void updateOrderStatus(Long orderId, OrderStatusUpdateRequestDto ordersStatusUpdateRequestDto) {
         OrderType newStatus = ordersStatusUpdateRequestDto.ordersType();
 
-        Orders targetOrder = ordersRepository.findById(orderId)
+        Orders targetOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         targetOrder.updateOrderStatus(newStatus);
+        orderRepository.save(targetOrder);
     }
 
     public void checkAvailableTime(ProductDetailsResponseDto productDetailsResponseDto) {
