@@ -35,11 +35,12 @@ public class PaymentService {
     public PaymentAttemptResponseDto attemptPayment(
             final PaymentAttemptRequestDto paymentAttemptRequestDto){
 
-        // 오더의 상태가 IN_PROGRESS인지 확인 (OrderClient)
+        // 주문 상태가 IN_PROGRESS인지 확인 (OrderClient)
         OrderDetailsResponseDto targetOrder = orderClient.getOrderDetails(paymentAttemptRequestDto.orderId());
         if (!(targetOrder.ordersType().equals(OrderType.IN_PROGRESS))) {
             throw new CustomException(ErrorCode.ORDER_NOT_IN_PROGRESS);
         }
+
         // 20%확률로 결제 실패 이탈, 상태 변경 FAILED_CUSTOMER → 재고 증가요청(StockClient)
         if (new Random().nextInt(100) < 20) {
             // 주문 상태를 FAILED_CUSTOMER로 변경
